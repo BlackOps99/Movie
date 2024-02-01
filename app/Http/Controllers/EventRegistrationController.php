@@ -6,6 +6,8 @@ use App\Models\Event;
 use App\Http\Requests\EventRegistration\EventRegistrationStoreRequest;
 use App\Models\Attende;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EventRegistration;
 
 class EventRegistrationController extends Controller
 {
@@ -29,7 +31,7 @@ class EventRegistrationController extends Controller
     {
         $validatedData = $request->validated();
 
-        Attende::create([
+        $attende = Attende::create([
             'name' => $validatedData['name'],
             'mobile' => $validatedData['mobile'],
             'email' => $validatedData['email'],
@@ -37,6 +39,8 @@ class EventRegistrationController extends Controller
             'movie_id' => $validatedData['movie_id'],
             'show_time' => Carbon::parse($validatedData['showtime'])
         ]);
+
+        Mail::to($validatedData['email'])->send(new EventRegistration($attende));
 
         return redirect()->route('event-registration.index')->with('success', 'You successfully registered.');
     }
